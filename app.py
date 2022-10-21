@@ -63,7 +63,7 @@ class ListForm(FlaskForm):
 def index():
     our_lists = db.session.query(Lists).all()
     return render_template("index.html", our_lists=our_lists)
-   # return render_template("listor.html")
+   # return render_template("index.html")
 
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
@@ -147,7 +147,7 @@ def lista():
 
     our_lists = Lists.query.order_by(Lists.date_added)
 
-    return render_template("listor.html",our_lists=our_lists)
+    return render_template("index.html",our_lists=our_lists)
 
 @app.route('/edit_lista/<int:id>', methods=['GET', 'POST'])
 def edit_lista(id):
