@@ -10,6 +10,7 @@ app = Flask(__name__)
 # SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 app.config['SECRET_KEY'] = "my super secret key that no one is supposed to know"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class Lists(db.Model):
