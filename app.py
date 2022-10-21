@@ -8,11 +8,17 @@ import os
 
 us_id = 0
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
 # SQLite database
+<<<<<<< HEAD
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
+
+=======
+
+
+>>>>>>> origin/master
 db = SQLAlchemy(app)
 
 class Lists(db.Model):
@@ -64,8 +70,8 @@ class ListForm(FlaskForm):
 @app.route('/')
 def index():
     our_lists = db.session.query(Lists).all()
-    return render_template("listor.html", our_lists=our_lists)
-   # return render_template("listor.html")
+    return render_template("index.html", our_lists=our_lists)
+   # return render_template("index.html")
 
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
@@ -149,7 +155,7 @@ def lista():
 
     our_lists = Lists.query.order_by(Lists.date_added)
 
-    return render_template("listor.html",our_lists=our_lists)
+    return render_template("index.html",our_lists=our_lists)
 
 @app.route('/edit_lista/<int:id>', methods=['GET', 'POST'])
 def edit_lista(id):
@@ -509,4 +515,4 @@ def posts(id,name):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
