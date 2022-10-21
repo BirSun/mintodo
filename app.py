@@ -61,7 +61,7 @@ class ListForm(FlaskForm):
 @app.route('/')
 def index():
     our_lists = db.session.query(Lists).all()
-    return render_template("listor.html", our_lists=our_lists)
+    return render_template("index.html", our_lists=our_lists)
    # return render_template("listor.html")
 
 @app.route('/user/add', methods=['GET', 'POST'])
