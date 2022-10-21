@@ -10,15 +10,14 @@ us_id = 0
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
 # SQLite database
-<<<<<<< HEAD
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-=======
 
 
->>>>>>> origin/master
+
 db = SQLAlchemy(app)
 
 class Lists(db.Model):
