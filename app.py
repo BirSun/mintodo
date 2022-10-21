@@ -4,12 +4,15 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 us_id = 0
 app = Flask(__name__)
 # SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
-app.config['SECRET_KEY'] = "my super secret key that no one is supposed to know"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
 db = SQLAlchemy(app)
 
 class Lists(db.Model):
