@@ -10,12 +10,12 @@ import os
 app = Flask(__name__)
 #app.config['SECRET_KEY'] = 'e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce'
 # SQLite database
-uri=app.config['SQLALCHEMY_DATABASE_URI']
+#uri=app.config['SQLALCHEMY_DATABASE_URI']
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL") 
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SECRET_KEY'] = 'e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://todo_db_dg98_user:0kaZ3dWd8KfJBSvuaX9RtnV7bnynWrRt@dpg-cd99q81a6gdv16a31ivg-a/todo_db_dg98'
+#if uri and uri.startswith("postgres://"):
+    #uri = uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
