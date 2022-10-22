@@ -52,7 +52,7 @@ class Posts(db.Model):
     def __repr__(self):
         return '<Name %r>' % self.name
 
-db.create_all()
+#db.create_all()
 class PostForm(FlaskForm):
     name = StringField("Namn", validators=[DataRequired()])
     info = StringField("Info")
