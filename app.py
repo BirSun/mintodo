@@ -10,8 +10,11 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
 # SQLite database
-
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
+uri=app.config['SQLALCHEMY_DATABASE_URI']
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
+app.config['SQLALCHEMY_DATABASE_URI']=os.getenv("DATABASE_URL")  # or other relevant config var
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -52,7 +55,7 @@ class Posts(db.Model):
     def __repr__(self):
         return '<Name %r>' % self.name
 
-db.create_all()
+#db.create_all()
 class PostForm(FlaskForm):
     name = StringField("Namn", validators=[DataRequired()])
     info = StringField("Info")
