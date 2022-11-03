@@ -2,16 +2,42 @@ h1{
 color: darkblue;
 font-size: 40px;
 }
+
 body{
 background: #F0F8FF;
 }
+.modal-body{
+background: #F0F8FF;
+}
+.modal-header{
+background: #F0F8FF;
+}
+.modal-footer{
+background: #F0F8FF;
+}
+.body_edit_lista{
+background: #FAEBD7;
+}
+.body_artiklar{
+ background: #FFFFE0;
+}
+.body_listor{
 
+ background: #F0FFF0;
+}
+
+.btn btn-primary{
+color: darkblue;
+}
+.btn btn-primary btn-sm{
+color: darkblue;
+}
 tbody{
 font-size: 18px;
 }
 
 form{
-font-size: 20px;
+font-size: 18px;
 }
 
 .navbar-brand{
@@ -19,9 +45,10 @@ font-size: 22px;
 }
 
 .form-control{
-font-size: 25px;
+font-size: 20px;
 }
 
 label{
 font-size: 15px;
 }
+

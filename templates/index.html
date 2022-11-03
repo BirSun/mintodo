@@ -7,23 +7,20 @@
     <title>Title</title>
     <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css'>
 
-            <body>
-
-            </body>
-</html>
-
 
 </head>
-<body>
-<h1>Listor!</h1>
+<body class="body_listor">
+<h1>Listor</h1>
 <br>
 
 
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalOne">
+
+<button type="button" class="btn btn-primary" style=background-color:#0000CD; data-bs-toggle="modal" data-bs-target="#modalOne">
   Ny Lista</button>
 
 <table class="table table-hover table-bordered table-striped">
 
+  <div class="table-responsive table-body">
 
     <thead>
     <tr>
@@ -37,27 +34,28 @@
 
     </tr>
     </thead>
+      <br>
+      <br>
+      <br>
 
 
 {% for our_list in our_lists %}
 
 
-            <div class="form-check">
-
-                <td><a href="{{ url_for('edit_lista', id=our_list.id) }}"><button type="button" class="btn btn-link"><span class='bi bi-pencil-square' style='font-size:22px;'></span></button></a></td>
-            <td><a href="{{ url_for('delete_all', id=our_list.id) }}"><button type="button" class="btn btn-link"><span class="bi bi-trash-fill" style='font-size:20px;'></span></button></a></td>
+      <td><a href="{{ url_for('edit_lista', id=our_list.id) }}"><button type="button" class="btn btn-link"><span class='bi bi-pencil-square' style='font-size:22px; color:#0000CD;'></span></button></a></td>
+            <td><a href="{{ url_for('delete_all', id=our_list.id) }}"><button type="button" class="btn btn-link"><span class="bi bi-trash-fill" style='font-size:20px; color:#0000CD;'></span></button></a></td>
             <!--<a href="{{ url_for('delete', id=our_list.id) }}">Delete</a><label class="form-check-label" for="DefaultCheckbox2"><label/>-->
             <td>{{our_list.id}}</td><td>{{our_list.name}}</td><td>{{our_list.info}}</td><td>{{our_list.category}}</td>
 
-            <td><a href="{{ url_for('add_post', id=our_list.id, namn=our_list.name) }}">...</a><label class="form-check-label"label/>
+            <td><a href="{{ url_for('add_post', id=our_list.id, namn=our_list.name) }}"><span class='bi bi-arrow-right-square' style='font-size:22px; color:#0000CD;'></span></a>
 
             </div>
          </td>
     </tr>
+
+ </div>
     {% endfor %}
 </table>
-
-
 
 <div class="modal" id="modalOne" tabindex="-1" aria-hidden="true" aria-hidden="true">
 
