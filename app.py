@@ -4,6 +4,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+
 from flask_migrate import Migrate
 import os
 
@@ -18,6 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 db = SQLAlchemy(app)
+
 migrate = Migrate(app, db)
 us_id = 0
 
@@ -58,6 +60,7 @@ class Artiklar(db.Model):
     name = db.Column(db.String(100))
     info = db.Column(db.String(100))
     category = db.Column(db.String(100))
+    ovr = db.Column(db.String(100))
 
 
     def __repr__(self):
