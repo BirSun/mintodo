@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css" />
+
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css' rel='stylesheet'>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script type="text/javascript" src="'js/myfile.js'"></script>
+
+<body class="body_artiklar">
+<h1>Artiklar</h1>
+
+
+ <select class="selectpicker" id="picker" onchange="divide()" data-show-subtext="true" data-live-search="true" editable="true" data-size="8">
+            <option data-hidden="true">Välj</option>
+
+     {% for cat in category_list %}
+
+            <option>{{cat.category}}</option>
+
+
+    {% for art in Artiklar %}
+      {%if art.category == cat.category%}
+       <option>{{art.name}}-{{art.info}}-{{art.category}}</option>
+
+      {%endif%}
+ {%endfor%}
+ {%endfor%}
+        </select>
+
+
+<div class="shadow mb-5 p-3 bg-body rounded">
+    <!--<form action="{{ url_for('artiklar') }}" method="POST">>-->
+    <form method="POST">
+       {{ form.hidden_tag() }}
+
+		{{ form.name.label(class="form-label") }}
+
+		{{ form.name(class="form-control", id="nam") }}
+
+        {{ form.info.label(class="form-label") }}
+
+		{{ form.info(class="form-control", id="info") }}
+
+         {{ form.category.label(class="form-label") }}
+
+		{{form.category(class="form-control", id="category")}}<br>
+
+
+        {{ form.submit(class="btn btn-secondary") }}
+    </form>
+</div>
+<table  class = "table table-borderd table-hover th-sm">
+
+    <tbody>
+
+     {% for art in Artiklar %}
+<tr>
+      <td>{{ art.name }} - {{ art.info }} - {{ art.category}}</td>
+     <td><a href="{{ url_for('delete_art', id=art.id) }}"><button type="button" class="btn btn-link"><span class="bi bi-trash-fill" style='font-size:20px; color:darkblue;'></span></button></a></td>
+
+</tr>
+    {% endfor %}
+
+    </table>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
+</body>
+</html>
+
+
+{% endblock %}
