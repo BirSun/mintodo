@@ -4,6 +4,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_migrate import Migrate
 import os
 
 
@@ -16,8 +17,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://todo_db_dg98_user:0kaZ3dWd
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 us_id = 0
 
 class Lists(db.Model):
@@ -42,6 +43,7 @@ class Posts(db.Model):
     category = db.Column(db.String(20), nullable=False)
     date_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     done = db.Column(db.Boolean, default=False)
+
     # Foreign Key To Link Lists (refer to primary key of the user)
     poster_id = db.Column(db.Integer, db.ForeignKey('lists.id'))
 
@@ -56,6 +58,7 @@ class Artiklar(db.Model):
     name = db.Column(db.String(100))
     info = db.Column(db.String(100))
     category = db.Column(db.String(100))
+
 
     def __repr__(self):
         return f'<Artikel: {self.name}>'
