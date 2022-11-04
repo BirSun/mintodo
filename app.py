@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://todo_db_dg98_user:0kaZ3dWd8KfJBSvuaX9RtnV7bnynWrRt@dpg-cd99q81a6gdv16a31ivg-a/todo_db_dg98'
 
-
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
