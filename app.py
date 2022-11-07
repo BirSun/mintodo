@@ -8,16 +8,12 @@ import os
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce')
-# SQLite database
-uri=app.config['SQLALCHEMY_DATABASE_URI']
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("todo_db_dg98")
-app.config['SQLALCHEMY_DATABASE_URI']=os.getenv("DATABASE_URL")  # or other relevant config var
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
 
+app.config['SECRET_KEY'] = 'e3aed434bbcc327d1a6eb4a645e8eb4673ce6ec9bf3145ce'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://todo_db_dg98_user:0kaZ3dWd8KfJBSvuaX9RtnV7bnynWrRt@dpg-cd99q81a6gdv16a31ivg-a/todo_db_dg98'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 
 
@@ -30,7 +26,7 @@ class Lists(db.Model):
     info = db.Column(db.String(50), nullable=False)
     category = db.Column(db.String(20), nullable=False)
     date_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    posts = db.relationship('Posts', backref='poster',cascade='all, delete')
+    posts = db.relationship('Postss', backref='poster',cascade='all, delete')
 
 
 
@@ -39,9 +35,9 @@ class Lists(db.Model):
     def __repr__(self):
         return '<Name %r>' % self.name
 
-class Posts(db.Model):
+class Postss(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     info = db.Column(db.String(50), nullable=False)
     category = db.Column(db.String(20), nullable=False)
     date_added = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -55,7 +51,24 @@ class Posts(db.Model):
     def __repr__(self):
         return '<Name %r>' % self.name
 
-#db.create_all()
+class Artiklar(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    info = db.Column(db.String(100))
+    category = db.Column(db.String(100))
+
+    def __repr__(self):
+        return f'<Artikel: {self.name}>'
+
+db.create_all()
+
+class ArtikelForm(FlaskForm):
+    name = StringField("Namn", validators=[DataRequired()])
+    info = StringField("Info")
+    category = StringField("Kategori")
+
+    submit = SubmitField("Lägg till")
+
 class PostForm(FlaskForm):
     name = StringField("Namn", validators=[DataRequired()])
     info = StringField("Info")
@@ -76,13 +89,42 @@ def index():
     return render_template("index.html", our_lists=our_lists)
    # return render_template("index.html")
 
+
+@app.route("/artiklar", methods=["GET", "POST"])
+def artiklar():
+    form = ArtikelForm()
+    new_category=[]
+    if request.method == "POST":
+        # CREATE RECORD
+        new_user = Artiklar(
+            name=request.form["name"],
+            info=request.form["info"],
+            category=request.form["category"]
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        all_artiklar = db.session.query(Artiklar).all()
+        return redirect(url_for('artiklar',Artiklar=all_artiklar))
+
+    artiklar_query = db.session.query(Artiklar).order_by(Artiklar.category)
+   # category_list = db.session.query(Artiklar.category).all()
+    category_list = db.session.query(Artiklar.category).order_by(Artiklar.category)
+
+    list_of_values = category_list
+    for item in list_of_values:
+        if item not in new_category:
+            new_category.append(item)
+
+    return render_template("artiklar.html", Artiklar=artiklar_query, form=form, category_list=new_category)
+
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
     name=None
     form = ListForm()
     if form.validate_on_submit():
         user = Lists.query.filter_by(info=form.info.data).first()
-        print(Posts.poster_id)
+        print(Postss.poster_id)
         if user is None:
             lista= Lists(name=form.name.data, info=form.info.data, category=form.category.data)
             db.session.add(lista)
@@ -109,7 +151,7 @@ def add_user():
 
 @app.route('/add_post/add/posts/<int:id>/<namn>', methods=['GET', 'POST'])
 def add_post(id,namn):
-
+    new_category = []
     global us_id
     form = PostForm()
     list_id = request.args.get('id')
@@ -117,7 +159,7 @@ def add_post(id,namn):
     if form.validate_on_submit():
         poster = id
         print(id)
-        post = Posts(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
+        post = Postss(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
 
         # Clear The Form
         form.name.data = ''
@@ -135,13 +177,23 @@ def add_post(id,namn):
     us_id=id
     print(f"{us_id} us_id")
     #name = form.name.data
-    posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(id == Posts.poster_id).order_by(Posts.category).all()
+    posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done, Postss.poster_id).join(Lists).filter(id == Postss.poster_id).order_by(Postss.category).all()
 
+    all_artiklar = db.session.query(Artiklar).order_by(Artiklar.category)
+
+    category_list = db.session.query(Artiklar.category).order_by(Artiklar.category)
+
+    list_of_values = category_list
+    for item in list_of_values:
+        if item not in new_category:
+            new_category.append(item)
         # Redirect to the webpage
     return render_template("add_post.html",
                 form=form,
                 namn=namn,
-                posts=posts)
+                posts=posts,
+                Artiklar=all_artiklar,
+                category_list=new_category)
 
 @app.route('/lista', methods=["GET", "POST"])
 
@@ -172,7 +224,7 @@ def edit_lista(id):
 
         db.session.commit()
 
-    return render_template("add_list.html", form=form, name_to_update=name_to_update, id=id)
+    return render_template("edit_list.html", form=form, name_to_update=name_to_update, id=id)
 
 @app.route("/delete_all/<int:id>")
 def delete_all(id):
@@ -192,15 +244,26 @@ def delete():
    db.session.commit()
    return redirect(url_for('index'))
 
+@app.route("/delete_art")
+def delete_art():
+    artikel_id = request.args.get('id')
+
+    # DELETE A RECORD BY ID
+    art_to_delete = Artiklar.query.get(artikel_id)
+    db.session.delete(art_to_delete)
+    db.session.commit()
+    return redirect(url_for('artiklar'))
+
 
 @app.route('/delete_post/posts/<int:id>', methods=["GET", "POST"])
 def delete_post(id):
+    new_category = []
     global us_id
     form = PostForm()
     #name = form.name.data
 
     if request.method == "GET":
-        post_to_delete = Posts.query.get(id)
+        post_to_delete = Postss.query.get(id)
         db.session.delete(post_to_delete)
         # Posts.query.filter_by(id=id).delete()
         db.session.commit()
@@ -210,15 +273,22 @@ def delete_post(id):
         flash("Post raderad!")
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
+        #all_artiklar = db.session.query(Artiklar).all()
+        all_artiklar = db.session.query(Artiklar).order_by(Artiklar.category)
+        category_list = db.session.query(Artiklar.category).order_by(Artiklar.category)
+        list_of_values = category_list
+        for item in list_of_values:
+            if item not in new_category:
+                new_category.append(item)
         # posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(id == Posts.poster_id).order_by(Posts.category).all()
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category,Posts.done, Posts.poster_id).join(
-            Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
+        posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done, Postss.poster_id).join(
+            Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
+        return render_template("add_post.html", form=form, posts=posts, namn=namn, Artiklar=all_artiklar, category_list=new_category)
 
     else:
 
         poster = us_id
-        post = Posts(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
+        post = Postss(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
 
         # Clear The Form
         form.name.data = ''
@@ -235,31 +305,40 @@ def delete_post(id):
         #name = form.name.data
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
+        all_artiklar = db.session.query(Artiklar).all()
         # posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(id == Posts.poster_id).order_by(Posts.category).all()
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category,Posts.done, Posts.poster_id).join(
-            Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
+        posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done, Postss.poster_id).join(
+            Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
 
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
+        return render_template("add_post.html", form=form, posts=posts, namn=namn, Artiklar=all_artiklar)
 
 @app.route("/complete/<int:id>", methods=['GET', 'POST'])
 def complete(id):
     form = PostForm()
+    new_category = []
     if request.method == "GET":
-        check = Posts.query.filter_by(id=id).first()
+        check = Postss.query.filter_by(id=id).first()
         print(check.done)
         check.done = not check.done
         print("true to false")
         print(check.done)
         db.session.commit()
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(
-        Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
+        posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done, Postss.poster_id).join(
+        Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
 
+        all_artiklar = db.session.query(Artiklar).order_by(Artiklar.category)
+        category_list = db.session.query(Artiklar.category).order_by(Artiklar.category)
+
+        list_of_values = category_list
+        for item in list_of_values:
+            if item not in new_category:
+                new_category.append(item)
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
-        return render_template("add_post.html",posts=posts ,form=form, namn=namn)
+        return render_template("add_post.html",posts=posts ,form=form, namn=namn, Artiklar=all_artiklar, category_list=new_category)
     else:
         poster = us_id
-        post = Posts(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
+        post = Postss(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
 
         # Clear The Form
         form.name.data = ''
@@ -277,35 +356,31 @@ def complete(id):
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
 
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done,
-                                 Posts.poster_id).join(
-            Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
+        posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done,
+                                 Postss.poster_id).join(
+            Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
+        all_artiklar = db.session.query(Artiklar).order_by(Artiklar.category)
 
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
+        return render_template("add_post.html", form=form, posts=posts, namn=namn, Artiklar=all_artiklar)
 
 
-@app.route("/complete_false/<int:id>", methods=['GET', 'POST'])
-def complete_false(id):
+@app.route("/complete_visa_lista/<int:id>", methods=['GET', 'POST'])
+def complete_visa_lista(id):
     form = PostForm()
-    if request.method == "GET":
-        not_check = Posts.query.filter_by(id=id).first()
 
-        print(id)
-        print(not_check.done)
-        not_check.done = True
-        print(not_check.done)
-        print("false to true")
+    if request.method == "GET":
+        check = Postss.query.filter_by(id=id).first()
+        check.done = not check.done
         db.session.commit()
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
+        posts = db.session.query(Postss).join(Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
 
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(
-        Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
-
-        return render_template("add_post.html",posts=posts,form=form, namn=namn)
+        return render_template("visa_lista.html",posts=posts, namn=namn)
+    """
     else:
         poster = us_id
-        post = Posts(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
+        post = Postss(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
 
         # Clear The Form
         form.name.data = ''
@@ -323,146 +398,21 @@ def complete_false(id):
         our_lists = db.session.query(Lists).get(us_id)
         namn = our_lists.name
 
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done,
-                                 Posts.poster_id).join(
-            Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
-
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
-
-
+        posts = db.session.query(Postss, Postss.id, Postss.name, Postss.info, Postss.category, Postss.done,
+                                 Postss.poster_id).join(
+            Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
+        all_artiklar = db.session.query(Artiklar).order_by(Artiklar.category)
+        return render_template("add_post.html", form=form, posts=posts, namn=namn, Artiklar=all_artiklar)
 """
-@app.route('/delete_post/posts/<int:id>', methods=["GET", "POST"])
-def delete_post(id):
+@app.route('/visa_lista', methods=['GET', 'POST'])
+def visa_lista():
     global us_id
-    form = PostForm()
-    name = form.name.data
 
-    if request.method == "GET":
-        post_to_delete = Posts.query.get(id)
-        db.session.delete(post_to_delete)
-        # Posts.query.filter_by(id=id).delete()
-        db.session.commit()
-
-        print("deleted")
-        print(us_id)
-        flash("Blog Post Deleted Successfully!")
-
-        our_lists = db.session.query(Lists).get(us_id)
-        namn = our_lists.name
-
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(id == Posts.poster_id).all()
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
-
-    else:
-
-        poster = us_id
-        post = Posts(name=form.name.data, info=form.info.data, category=form.category.data, poster_id=poster)
-
-        # Clear The Form
-        form.name.data = ''
-        form.info.data = ''
-        # form.author.data = ''
-        form.category.data = ''
-
-        # Add post data to database
-        db.session.add(post)
-        db.session.commit()
-
-        # Return a Message
-        flash("Blog Post Submitted Successfully!")
-        name = form.name.data
-        our_lists = db.session.query(Lists).get(us_id)
-        namn = our_lists.name
-
-        posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(id == Posts.poster_id).all()
-
-        return render_template("add_post.html", form=form, posts=posts, namn=namn)
-"""
-
-"""
-#@app.route('/delete_post/posts/<int:id>', methods=['GET', 'POST'])
-@app.route('/delete_post/posts/<int:id>', methods=['GET', 'POST'])
-def delete_post(id):
-   global us_id
-   form = PostForm()
-
-   print(f"{id} post")
-   print(f"{us_id} id!")
-
-   ###
-   user_to_delete = Posts.query.get(id)
-   db.session.delete(user_to_delete)
-   #to_delete = Posts.query.filter_by(id=id).first()
-   #db.session.delete(to_delete)
-   #post_to_delete = Posts.query.get(id)
-   #db.session.delete(post_to_delete)
-   db.session.commit()
-
-   print("deleted")
-   print(us_id)
-   name = form.name.data
-
-
-   #namn = db.session.query(Lists).get(us_id)
-   #nam =  namn
-   #print(nam)
-   #our_lists = Lists.query.all()
-
-   our_lists = db.session.query(Lists).get(us_id)
-   namn = our_lists.name
-   print(namn)
-   cat = our_lists.id
-   print(f"{cat} cat")
-
-   posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(us_id == Posts.poster_id).order_by(Posts.category).all()
-   return render_template("add_post.html",
-                          form=form,
-                          name=name,
-                          posts=posts)
-  #return redirect(url_for('add_post', posts=posts, id=id, namn=namn, form=form, name=name))
-   #return render_template("add_post.html", form=form, posts=posts, name=name, namn=namn)
-   #return render_template("add_post.html", form=form, posts=posts, name=name, namn=namn)
-   #return redirect(url_for('add_post',id=id, namn=namn, posts=posts, form=form, name=name))
-"""
-"""
-@app.route("/complete/<int:id>", methods=['GET', 'POST'])
-def complete(id):
-    form = PostForm()
-    check = Posts.query.filter_by(id=id).first()
-
-    print(check.done)
-    check.done = not check.done
-    print("true to false")
-    print(check.done)
-    db.session.commit()
-    posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(us_id == Posts.poster_id).all()
-   # name = form.name.data
     our_lists = db.session.query(Lists).get(us_id)
     namn = our_lists.name
+    posts = db.session.query(Postss).join(Lists).filter(us_id == Postss.poster_id).order_by(Postss.category).all()
 
-    #return redirect(url_for("add_post",posts=posts, form=form, id=id, namn=namn))
-    #return redirect(url_for("add_post", id=id, namn=namn))
-    return render_template("add_post.html",posts=posts ,form=form, namn=namn)
-
-@app.route("/complete_false/<int:id>", methods=['GET', 'POST'])
-def complete_false(id):
-    form = PostForm()
-    not_check = Posts.query.filter_by(id=id).first()
-
-    print(id)
-    print(not_check.done)
-    not_check.done = True
-    print(not_check.done)
-    print("false to true")
-    db.session.commit()
-    our_lists = db.session.query(Lists).get(us_id)
-    namn = our_lists.name
-    #name = form.name.data
-    posts = db.session.query(Posts, Posts.id, Posts.name, Posts.info, Posts.category, Posts.done, Posts.poster_id).join(Lists).filter(us_id == Posts.poster_id).all()
-    #return redirect(url_for("add_post",posts=posts, form=form, id=id, namn=namn))
-    #return redirect(url_for("add_post", id=id, namn=namn))
-    return render_template("add_post.html",posts=posts,form=form, namn=namn)
-"""
+    return render_template("visa_lista.html",posts=posts, namn=namn)
 
 @app.route('/posts/<int:id>/<name>')
 def posts(id,name):
@@ -491,7 +441,7 @@ def posts(id,name):
     #postid = post.poster_id
     #posts = Posts.query.get_or_404(id)
     #postid = Posts.poster_id
-    posts = db.session.query(Posts, Posts.name, Posts.info, Posts.category).join(Lists).filter(id == Posts.poster_id).all()
+    posts = db.session.query(Postss, Postss.name, Postss.info, Postss.category).join(Lists).filter(id == Postss.poster_id).all()
     for post in posts:
 
 #user = db.session.query(User, Role.index).join(Role).filter(User.email == form.email.data).first()
@@ -499,21 +449,7 @@ def posts(id,name):
      return render_template('post.html', posts=posts, name=name)
 
 
-"""
-        if id == post.poster_id:
-            print(id)
-            print(post.poster_id)
-            print(post)
-            poster = post
-            postid=post.poster_id
-            print(postid)
-            #return render_template('post.html', posts=posts, postid=postid)
-            """
 
-
-#@app.errorhandler(404)
-#def page_not_found(e):
-	#return render_template("404.html"), 404
 
 
 
